@@ -17,6 +17,11 @@
 
 本项目规划为多人协作，ticket 命名与工作流约定以 `home-monitor/CONTRIBUTING.md` 为准。ticket 实体存于 `personal/tickets/`（本仓库）。
 
+## 提交规则
+
+- `personal/` 下的 ticket 记录随 ticket 进度**自动 commit + push**（本仓库），无需逐次确认；`personal/tmp-ai-chat/` 等临时目录不提交。
+- `home-monitor/` 仓库的改动仍需逐次确认后才 commit。
+
 ## 环境备忘
 
 - Windows 11 + Git Bash；ESP 固件开发在 Windows 侧用 VSCode + PlatformIO（Core 在 `C:\.platformio`，`PLATFORMIO_CORE_DIR=C:/.platformio`）
