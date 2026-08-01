@@ -27,3 +27,11 @@ Phase: 1
 - 验证：容器重建后历史保留；短接开门事件 id 6/7 落盘 + Server酱告警正常；retain 修复后重建不再新增重复事件
 - 顺带完成 #16 现场验收：带回家换 WiFi，板子配网保持 mDNS 主机名不动即恢复连接（家里 WiFi 需设"专用"网络配置）
 - 剩余：PR2 物模型档案 + discovery 代发；PR3 前端看板页
+
+### PR2（2026-08-01）：物模型档案 + HA discovery 代发
+
+- `nodetypes/contact.json`：ha 段（binary_sensor door + rssi/uptime 传感器）+ dashboard 段（渲染映射/事件文案）
+- `profiles.py` 档案加载；`discovery.py` 按档案生成 HA config；新节点出现时服务端代发（retain 幂等），固件零改动
+- 验证：`mosquitto_sub -t 'homeassistant/#'` 收到 3 条 retain config（binary_sensor/rssi/uptime），字段符合 HA MQTT Discovery 格式；`GET /api/profiles` 正常
+- 设计点：registry 新条目触发代发（_ensure_node），app 重启经 retain 重建注册表时自然重发；broker 有持久化，config 本身也 retain，双保险
+- 剩余：PR3 前端看板页（closes #19）
