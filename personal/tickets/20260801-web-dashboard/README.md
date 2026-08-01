@@ -1,7 +1,7 @@
 # Web 监控看板：HA Discovery 兼容物模型 + 通用节点渲染
 
 Issue: CoCoCoDeDeDe/home-monitor#19
-状态: 未开工
+状态: 已完成（PR #21/#22/#23 全部合并，Issue #19 已关闭）
 Phase: 1
 
 任务清单与验收标准以 Issue 为准：https://github.com/CoCoCoDeDeDe/home-monitor/issues/19
