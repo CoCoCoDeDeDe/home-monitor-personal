@@ -1,7 +1,7 @@
 # 固件：MQTT host 支持 mDNS 主机名（免 IP 重配）
 
 Issue: CoCoCoDeDeDe/home-monitor#16
-状态: 已完成（待 PR 合并关闭 Issue）
+状态: 已完成（PR #17 已合并，Issue #16 已关闭）
 Phase: 1
 
 任务清单与验收标准以 Issue 为准：https://github.com/CoCoCoDeDeDe/home-monitor/issues/16
