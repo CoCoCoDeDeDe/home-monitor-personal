@@ -1,7 +1,7 @@
 # 固件：节点健康上报（RSSI/uptime）
 
 Issue: CoCoCoDeDeDe/home-monitor#10
-状态: 已完成（待 PR 合并关闭 Issue）
+状态: 已完成（PR #18 已合并，Issue #10 已关闭）
 Phase: 1
 
 任务清单与验收标准以 Issue 为准：https://github.com/CoCoCoDeDeDe/home-monitor/issues/10
