@@ -37,3 +37,4 @@ Phase: 1
 
 - 半开连接窗口（keepalive 检测前 ~90s）内的事件仍会丢失，如需更强保障可考虑缩短 keepalive 或发布失败回退缓存（当前实测主要断线场景都能被缓存覆盖）。
 - 板子每次 boot 会把初始状态当事件缓存并走一次 sync 握手补发，无害但多一次 syncreq 往返。
+- **ESP-01 版本 contact-node**：不新启 firmware 项目，同代码加 `[env:esp01_1m]` 用 build_flags 区分引脚即可（GPIO 选择有 boot strap 约束：GPIO0/GPIO2 上电须为高，reed 接 GPIO2 需保证上电时断开，或用 RX(GPIO3) 牺牲串口调试；FLASH 清配置功能需换触发方式）。**启动条件：硬件方案（引脚分配/供电）确定且 NodeMCU 版 esp8266 实际落地后再做**。
