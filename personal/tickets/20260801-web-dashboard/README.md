@@ -14,7 +14,16 @@ Phase: 1
 - 关键设计：**discovery config 由服务端代发（retain）而非固件发**——HA 不关心来源，固件保持零改动轻量，接真 HA 时 publisher 直接复用
 - 前端：无框架单页，档案驱动通用渲染 + 未知类型兜底卡片；不引前端构建链
 - 附带收益：事件落盘（现在事件在内存，重启即丢）
+- **事件存储选 SQLite**：单文件零服务（Python 内置 sqlite3，挂 volume 即可）；事件量小（每天数百条）+ 单写者 + 结构化数据，PostgreSQL/MongoDB 的优势用不上只有运维成本；标准 SQL 保留向 PostgreSQL 平迁的路径；图片类二进制不进库只存路径
 
 ## 过程记录
 
-（待开工后补充）
+### PR1（2026-08-01）：后端 SQLite 事件落盘 + API
+
+- `events.py`：EventStore（SQLite 单文件，mqtt 回调线程与 FastAPI 线程并发需加锁），表 events(ts/type/node/kind/payload JSON)
+- 回调签名加物模型类型前缀：`on_state/on_status/on_health(ntype, node, ...)`，订阅改 `<type>/<id>/*` 通配（新节点类型自动被消费）
+- **踩坑**：app 重启时 broker 重放 retain 消息被当成新事件重复记录、甚至重复告警——回调加 `retained` 标志（paho `msg.retain`），重放只更新注册表不落盘不告警
+- compose 挂 `./data:/data`，EVENTS_DB=/data/events.db；server/data/ 入 .gitignore
+- 验证：容器重建后历史保留；短接开门事件 id 6/7 落盘 + Server酱告警正常；retain 修复后重建不再新增重复事件
+- 顺带完成 #16 现场验收：带回家换 WiFi，板子配网保持 mDNS 主机名不动即恢复连接（家里 WiFi 需设"专用"网络配置）
+- 剩余：PR2 物模型档案 + discovery 代发；PR3 前端看板页
