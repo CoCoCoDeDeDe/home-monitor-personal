@@ -35,3 +35,10 @@ Phase: 1
 - 验证：`mosquitto_sub -t 'homeassistant/#'` 收到 3 条 retain config（binary_sensor/rssi/uptime），字段符合 HA MQTT Discovery 格式；`GET /api/profiles` 正常
 - 设计点：registry 新条目触发代发（_ensure_node），app 重启经 retain 重建注册表时自然重发；broker 有持久化，config 本身也 retain，双保险
 - 剩余：PR3 前端看板页（closes #19）
+
+### PR3（2026-08-01）：前端看板页
+
+- `static/index.html`：无框架单页，5s 轮询 /nodes + /api/events + /api/profiles；档案驱动节点卡片（primary 状态映射/字段格式化/级别配色）+ 事件时间线（文案/补发标记）+ 未知类型兜底卡片
+- `GET /` 返回看板页（FileResponse）
+- 踩坑：模板字符串收尾反引号写成单引号 → `Unexpected end of input` 页面只剩骨架；用 `node --check` 提取脚本定位。教训：写完 JS 先过一遍语法检查再部署
+- 验证：localhost/LAN/Tailscale 三端可访问；卡片（门状态/信号/在线时长）、事件时间线渲染正确（用户截图确认）
