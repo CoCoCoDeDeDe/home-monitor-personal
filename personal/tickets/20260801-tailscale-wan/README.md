@@ -1,7 +1,7 @@
 # Tailscale 组网实现外网访问（无公网 IP）
 
 Issue: CoCoCoDeDeDe/home-monitor#8
-状态: 已完成（待 PR 合并关闭 Issue）
+状态: 已完成（PR #15 已合并，Issue #8 已关闭）
 Phase: 3（外网访问）
 
 任务清单与验收标准以 Issue 为准：https://github.com/CoCoCoDeDeDe/home-monitor/issues/8
