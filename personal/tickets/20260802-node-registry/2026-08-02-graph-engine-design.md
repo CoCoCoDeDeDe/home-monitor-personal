@@ -10,7 +10,7 @@ Issue: CoCoCoDeDeDe/home-monitor#27
 头脑风暴后演进为参考 Niagara Framework 的数据流图理念：
 
 - 底层只保留硬件本质（collision + 布尔原始值），不预设任何脱离传感器本质的语义
-- 用户直接配置 0/1（triggered/released）各对应什么人话、哪个级别
+- 用户直接配置 0/1（布尔原始值，map 键 `"1"`/`"0"`）各对应什么人话、哪个级别
 - 架构兼容未来图联动（逻辑门/延时/设备互控），第一版先把 IO 输入输出打通
 
 ## 关键决策（用户逐节确认）
@@ -44,8 +44,8 @@ Issue: CoCoCoDeDeDe/home-monitor#27
   "blocks": [
     { "id": "in1",   "kind": "io_in",     "params": { "topic": "collision/6750f8/state" } },
     { "id": "sem1",  "kind": "translate", "params": { "map": {
-        "triggered": { "text": "门窗打开", "level": "warn" },
-        "released":  { "text": "门窗关闭", "level": "info" } } } },
+        "1": { "text": "门窗打开", "level": "warn" },
+        "0": { "text": "门窗关闭", "level": "info" } } } },
     { "id": "disp1", "kind": "display",   "params": { "alias": "平台窗户" } },
     { "id": "alm1",  "kind": "alert",     "params": { "cooldown": 60, "channel": "sct" } }
   ],
@@ -119,6 +119,18 @@ LWT/健康上报、固件（PR2 才改 contact→collision，合并不刷机）
 - PR1（refs #27）：图引擎 + graphs 表 + 5 种块 + 投影 API + 存量切换 + 看板改造 + 测试
 - PR2（closes #27）：固件 contact-node → collision-node（合并不刷机，
   等 #9 长稳 8/5 满期后刷机验证）
+
+## 修订（2026-08-02 晚）：全链路布尔化
+
+用户拍板：IoT 设备 ↔ 后端的线上协议与后端存储**只跑布尔值**（`1`=触发/`0`=释放），
+文字只在图输出（显示/告警）一层出现。原设计的 triggered/released 词表取消：
+
+- 固件 payload：`{"state":1}` / `{"state":0}`；极性约定 1=传感器被激活
+- events 落盘 `state` 为 int；graphs 表 map 键 `"1"`/`"0"`（JSON 键为字符串，
+  翻译块按 `str(raw)` 查找，raw 原样透传进 out）
+- 表单恒定两行（1/0）；open/closed/triggered/released 成为历史词，
+  仅保留在 contact/presence 模板中服务旧事件记录翻译
+- 部署时清空 graphs 表（开发期单节点，词表语义已变，重新配置即可）
 
 ## 未来方向（不在本期）
 

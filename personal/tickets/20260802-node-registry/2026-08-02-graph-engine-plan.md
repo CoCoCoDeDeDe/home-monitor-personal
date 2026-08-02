@@ -8,6 +8,8 @@
 
 **Tech Stack:** Python 3.12 / FastAPI / paho-mqtt / SQLite（标准库）/ 原生 JS；测试为零依赖 `python test_graph.py`（requests 打 stub，不用 pytest）。
 
+> **修订（2026-08-02 晚）：全链路布尔化。** Task 1-7 执行时线上词表还是单词（open/closed、triggered/released），随后用户拍板改为布尔（`1`=触发/`0`=释放），已由后续 commit 修正（翻译块按 `str(raw)` 查 map、档案/模板键改 1/0、表单动态行、模板保留历史词键）。下文 Task 1-7 代码块中的 triggered/released 以实际仓库为准；**Task 8 已按布尔协议改写**。
+
 ## Global Constraints
 
 - 仓库 `home-monitor/`，工作分支 `feat/node-registry`；commit message 带 `(refs #27)`；home-monitor 仓库 commit 前列改动清单等用户确认
@@ -1310,11 +1312,12 @@ git mv firmware/contact-node firmware/collision-node
 ```
 
 `main.cpp` 全部替换点（逐处 Edit）：
-- 头注释 `contact-node：ESP8266/ESP-01 + 干簧管 门窗传感器节点` → `collision-node：ESP8266/ESP-01 + 碰撞/接触传感器节点（原始二值上报器）`；补一行：`语义（门窗/在位…）由服务端图引擎配置（Issue #27），固件不猜部署语义`
+- 头注释 `contact-node：ESP8266/ESP-01 + 干簧管 门窗传感器节点` → `collision-node：ESP8266/ESP-01 + 碰撞/接触传感器节点（布尔二值上报器）`；补两行：`线上协议为原始布尔 {"state":1|0}（1=触发/0=释放），语义（门窗/在位…）由服务端图引擎配置（Issue #27），固件不猜部署语义`
 - `TOPIC_SYNC`/`TOPIC_SYNCREQ`：`"contact/sync"` → `"collision/sync"`，`"contact/syncreq"` → `"collision/syncreq"`（注释同步改）
 - `nodeId`：`snprintf(nodeId, sizeof(nodeId), "contact-%06x", ESP.getChipId())` → `"collision-%06x"`；三个 topic 的 `nodeId + 8` → `nodeId + 10`（"collision-" 10 字符）
 - topic 前缀：`"contact/%s/state"`→`"collision/%s/state"`，status/health 同理
-- 状态词：`lastStableState == HIGH ? "closed" : "open"` → `== HIGH ? "released" : "triggered"`；`mqttConnect` 里 `publishState(digitalRead(PIN_REED) == HIGH ? "closed" : "open")` 同理；`flushEvents` 里 `s == "open" || s == "closed"` → `s == "triggered" || s == "released"`
+- 状态值布尔化：`publishState(const char* state, ...)` → `publishState(int state, ...)`，payload `{\"node\":\"%s\",\"state\":%d%s}`；`cacheEvent/flushEvents/eventsPending` 缓存行存 `"1"`/`"0"`，`flushEvents` 里 `s == "open" || s == "closed"` → `s == "1" || s == "0"` 且 `publishState(s.toInt(), true)`
+- 电平→布尔：`lastStableState == HIGH ? "closed" : "open"` → `== HIGH ? 0 : 1`（HIGH=释放=0，LOW=触发=1）；`mqttConnect` 里 `publishState(digitalRead(PIN_REED) == HIGH ? "closed" : "open")` → `publishState(digitalRead(PIN_REED) == HIGH ? 0 : 1)`
 - 配网热点：`wm.autoConnect("contact-node-setup")` → `"collision-node-setup"`；WiFiManager 注释里的热点名同步
 - 其余注释中的 `contact/` topic 引用全局替换为 `collision/`
 - `design.md` 目录树 `└── contact-node/` → `└── collision-node/`
@@ -1332,8 +1335,8 @@ Expected: SUCCESS（无编译错误）
 
 ```bash
 git add firmware docs/design.md
-git commit -m "feat: contact-node 改名 collision-node，状态词改 triggered/released (closes #27)"
-"C:/Program Files/GitHub CLI/gh.exe" pr create --base main --title "feat: 固件 contact→collision 原始二值上报 (closes #27)" --body "固件退化为诚实二值上报器：topic/类型改 collision，状态词 open/closed→triggered/released。合并不刷机——窗户节点 6750f8 跑 #9 长稳到 8/5，满期后刷机验证。"
+git commit -m "feat: contact-node 改名 collision-node，状态值布尔化 1/0 (closes #27)"
+"C:/Program Files/GitHub CLI/gh.exe" pr create --base main --title "feat: 固件 contact→collision 布尔二值上报 (closes #27)" --body "固件退化为诚实布尔上报器：topic/类型改 collision，状态值 open/closed→{\"state\":1|0}（1=触发/0=释放）。合并不刷机——窗户节点 6750f8 跑 #9 长稳到 8/5，满期后刷机验证。"
 "C:/Program Files/GitHub CLI/gh.exe" pr merge --squash
 git checkout main && git pull
 ```
