@@ -1,2 +1,5 @@
 # 独立的 home-monitor 仓库目录，由各自仓库管理
 home-monitor*/
+
+# 临时 AI 会话目录，不提交
+personal/tmp-ai-chat/
